@@ -20,18 +20,30 @@ export async function apiFetch<T>(
   options?: RequestInit
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
+  // body가 있는 경우에만 Content-Type 헤더 추가
+  const headers: HeadersInit = {
+    ...options?.headers,
+  };
+
+  if (options?.body) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const response = await fetch(url, {
     ...options,
     credentials: 'include', // 쿠키 포함
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {
-    throw new Error(`API Error: ${response.statusText}`);
+    const errorDetails = {
+      status: response.status,
+      statusText: response.statusText,
+      url: url,
+    };
+    console.error('API Error:', errorDetails);
+    throw new Error(`API Error: ${response.statusText} (${response.status}) - ${endpoint}`);
   }
 
   const contentType = response.headers.get('content-type');
