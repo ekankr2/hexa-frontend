@@ -1,7 +1,10 @@
-import { requireAuth } from '@/lib/auth.server';
 import ConvertClient from './ConvertClient';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
-export default async function ConvertPage() {
-  await requireAuth();
-  return <ConvertClient />;
+export default function ConvertPage() {
+  return (
+    <ProtectedRoute>
+      <ConvertClient />
+    </ProtectedRoute>
+  );
 }

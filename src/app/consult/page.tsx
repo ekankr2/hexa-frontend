@@ -1,7 +1,10 @@
-import { requireAuth } from '@/lib/auth.server';
 import ConsultClient from './ConsultClient';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
-export default async function ConsultPage() {
-  await requireAuth();
-  return <ConsultClient />;
+export default function ConsultPage() {
+  return (
+    <ProtectedRoute>
+      <ConsultClient />
+    </ProtectedRoute>
+  );
 }
