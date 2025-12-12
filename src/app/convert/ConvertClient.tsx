@@ -1,23 +1,40 @@
 'use client';
 
 import { useState } from 'react';
+import { convertMessage, ToneMessage } from '@/lib/api';
 
 export default function ConvertClient() {
   const [message, setMessage] = useState('');
   const [senderMbti, setSenderMbti] = useState('');
   const [receiverMbti, setReceiverMbti] = useState('');
-  const [results, setResults] = useState<{ tone: string; content: string; explanation: string }[]>([]);
+  const [results, setResults] = useState<ToneMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const mbtiTypes = ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP',
     'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ', 'ISTP', 'ISFP', 'ESTP', 'ESFP'];
 
-  const handleConvert = () => {
-    // TODO: API 연동
-    setResults([
-      { tone: '공손한', content: '안녕하세요, 혹시 시간 되실 때 이 부분 확인 부탁드려도 될까요?', explanation: 'ISTJ는 예의 바른 표현을 선호합니다.' },
-      { tone: '캐주얼한', content: '이거 확인 좀 해줄 수 있어?', explanation: '친근한 톤으로 부담 없이 요청합니다.' },
-      { tone: '간결한', content: '확인 요청드립니다.', explanation: '핵심만 간단히 전달합니다.' },
-    ]);
+  const handleConvert = async () => {
+    if (!message.trim() || !senderMbti || !receiverMbti) {
+      setError('모든 항목을 입력해주세요.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await convertMessage({
+        original_message: message,
+        sender_mbti: senderMbti,
+        receiver_mbti: receiverMbti,
+      });
+      setResults(response.tones);
+    } catch (err: any) {
+      setError(err.message || '변환 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -68,11 +85,18 @@ export default function ConvertClient() {
           />
         </div>
 
+        {error && (
+          <div className="p-3 bg-red-100 text-red-600 rounded-xl text-sm">
+            {error}
+          </div>
+        )}
+
         <button
           onClick={handleConvert}
-          className="w-full py-4 bg-gradient-to-r from-purple-400 to-pink-400 text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+          disabled={isLoading}
+          className="w-full py-4 bg-gradient-to-r from-purple-400 to-pink-400 text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          변환하기
+          {isLoading ? '변환 중...' : '변환하기'}
         </button>
       </div>
 

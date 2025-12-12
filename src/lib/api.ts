@@ -213,3 +213,29 @@ export async function getConsultHistory(): Promise<ConsultHistoryResponse> {
   });
 }
 
+/**
+ * 메시지 변환 (3가지 톤)
+ */
+export interface ConvertRequest {
+  original_message: string;
+  sender_mbti: string;
+  receiver_mbti: string;
+}
+
+export interface ToneMessage {
+  tone: string;
+  content: string;
+  explanation: string;
+}
+
+export interface ConvertResponse {
+  tones: ToneMessage[];
+}
+
+export async function convertMessage(data: ConvertRequest): Promise<ConvertResponse> {
+  return apiFetch<ConvertResponse>('/converter/convert-three-tones', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
